@@ -27,10 +27,13 @@ let idg = 1;
 // Html code to render tamplate of specific tab
 const inputText = id => {
   return `<div class="form-group mt-4">
+
   <label for="inputText"
     ><h1 class="display-5">Tab ${id} : Input Text(__example__ for labels)</h1></label
   >
-  <button onclick="savedoc()" class="btn btn-primary mb-3 ml-auto ">Save as doc</button>
+  <button onclick="savedoc()" class="ml-5 btn btn-info mb-3 mr-2">Save as doc</button>
+  <button onclick="closecurrenttab()" class="btn btn-danger mb-3">Close</button>
+
   <textarea
     class="form-control"
     id="input${id}"
@@ -44,17 +47,26 @@ const inputText = id => {
   <div class="d-flex flex-column align-items-center" id="label${id}"></div>
 </div>
 <div>
-  <label for="generatedOutput"
+
+  <label for="generatedOutput" 
     ><h1 class="display-5">Output Text</h1></label
-  >
-  <div id="output${id}"></div>
+  > 
+  <button onclick="saveoutdoc()" class="ml-5 btn btn-info mb-3">Save as doc</button> </div>
+  <div id="output${id}">
 </div>`;
 };
 
 // Calling download function from save as doc button
 const savedoc = () => {
-  let fileName = `file${activeTab}.doc`;
+  let fileName = 'file.doc';
   let elid = `input${activeTab}`;
+  downloadInnerHtml(fileName, elid);
+};
+
+// Calling download function for generated output
+const saveoutdoc = () => {
+  let fileName = 'file.doc';
+  let elid = `output${activeTab}`;
   downloadInnerHtml(fileName, elid);
 };
 
@@ -68,6 +80,22 @@ const downloadInnerHtml = (filename, elId) => {
     'data:' + 'text/doc' + ';charset=utf-8,' + encodeURIComponent(elHtml)
   );
   link.click();
+};
+
+// Function to close tabs
+const closecurrenttab = () => {
+  if (activeTab === 1) {
+    alert("Can't close default tab");
+    return;
+  }
+  let prevElement = document.getElementById(`${activeTab}`).parentNode
+    .previousElementSibling.childNodes[0].id;
+  document.getElementById(`${activeTab}`).parentNode.remove();
+  localStorage.removeItem(`${activeTab}`);
+  activeTab = parseInt(prevElement);
+
+  document.getElementById(`${activeTab}`).click();
+  document.getElementById(`${activeTab}`).classList.add('active');
 };
 
 // Html code to render label section
@@ -89,7 +117,7 @@ const renderLabel = (array, id) => {
           </div>
       `;
   }
-  labelhtml += ` <button type="button" onclick="genButton()" id="gener${id}" class="my-4 btn btn-primary btn-lg">
+  labelhtml += ` <button type="button" onclick="genButton()" id="gener${id}" class="my-4 btn btn-info btn-lg">
     Generate
   </button>`;
   document.querySelector(`#label${id}`).innerHTML = labelhtml;
@@ -125,9 +153,24 @@ const outputText = (str, labels, id) => {
 
 // First tab open automatic after window loading complete
 window.onload = () => {
+  let newTabElement = document.createElement('li');
+  newTabElement.setAttribute('class', 'nav-item');
+
+  let a = document.createElement('a');
+  a.setAttribute('class', 'nav-link');
+  a.setAttribute('href', '#');
+  let name = document.createTextNode(`Tab ${1}`);
+  a.appendChild(name);
+  a.setAttribute('id', '1');
+  newTabElement.appendChild(a);
+  let tabs = document.querySelector('#tabs');
+  tabs.insertBefore(newTabElement, tabs.lastElementChild);
   document.querySelector('.tab-content').innerHTML = inputText('1');
-  var editor = CKEDITOR.replace('editor1');
-  new renderer(editor, '1');
+
+  document.getElementById('1').click();
+  document.getElementById('1').classList.add('active');
+  // var editor = CKEDITOR.replace('editor1');
+  // new renderer(editor, '1');
 };
 
 //Tabs generator
@@ -160,9 +203,9 @@ document.querySelector('#tabs').addEventListener('click', e => {
   }
 
   e.target.classList.add('active');
-  document.getElementById(activeTab).classList.remove('active');
+  document.getElementById(`${activeTab}`).classList.remove('active');
   document.querySelector('.tab-content').innerHTML = inputText(e.target.id);
-  activeTab = e.target.id;
+  activeTab = parseInt(e.target.id);
   var editor = CKEDITOR.replace(`editor${e.target.id}`);
   new renderer(editor, e.target.id);
 });
