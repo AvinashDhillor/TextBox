@@ -19,10 +19,12 @@ $('.blur').blur(function() {
     .show();
 });
 
+// Trackers
 let tabCount = 1;
 let activeTab = 1;
 let idg = 1;
 
+// Html code to render tamplate of specific tab
 const inputText = id => {
   return `<div class="form-group mt-4">
   <label for="inputText"
@@ -49,6 +51,7 @@ const inputText = id => {
 </div>`;
 };
 
+// Html code to render label section
 const renderLabel = (array, id) => {
   var labelhtml = '';
   for (let i = 0; i < array.length; i++) {
@@ -73,13 +76,42 @@ const renderLabel = (array, id) => {
   document.querySelector(`#label${id}`).innerHTML = labelhtml;
 };
 
+// Get called when Click on user button
+const genButton = () => {
+  let d = JSON.parse(localStorage.getItem(activeTab));
+  let str = d.string;
+  let labels = d.labels;
+
+  if (str === undefined || labels === undefined) {
+    str = ' ';
+    labels = [];
+  }
+  // Generate output of input text
+  outputText(str, labels, activeTab);
+};
+
+//Function to generate output
+const outputText = (str, labels, id) => {
+  let array = str.split('__');
+  for (let i = 0; i < labels.length; i++) {
+    for (let j = 0; j < array.length; j++) {
+      if (`${labels[i]}` === array[j]) {
+        array[j] = document.querySelector(`#${labels[i]}`).value;
+      }
+    }
+  }
+  let modString = array.join(' ');
+  document.querySelector(`#output${id}`).innerHTML = modString;
+};
+
+// First tab open automatic after window loading complete
 window.onload = () => {
   document.querySelector('.tab-content').innerHTML = inputText('1');
   var editor = CKEDITOR.replace('editor1');
   new renderer(editor, '1');
 };
 
-//Tabs
+//Tabs generator
 document.querySelector('#addNewTab').addEventListener('click', e => {
   tabCount = tabCount + 1;
   let newTabElement = document.createElement('li');
@@ -98,6 +130,7 @@ document.querySelector('#addNewTab').addEventListener('click', e => {
   tabs.insertBefore(newTabElement, tabs.lastElementChild);
 });
 
+// Get record of current active tab and fetch data from storage
 document.querySelector('#tabs').addEventListener('click', e => {
   if (
     e.target.parentElement.id === 'addNewTab' ||
@@ -114,6 +147,7 @@ document.querySelector('#tabs').addEventListener('click', e => {
   new renderer(editor, e.target.id);
 });
 
+//contains method for storing input text and labels in realtime
 class renderer {
   constructor(editor, id) {
     this.editor = editor;
@@ -123,6 +157,7 @@ class renderer {
       labels: []
     };
 
+    //Keep Track of input text in input box
     this.editor.on('change', e => {
       let inputText = e.editor.getData();
       data.string = inputText;
@@ -135,19 +170,22 @@ class renderer {
 
     let string = ' ';
     let labels = [];
-
+    //Fetch data from local storage
     let datafromstorage = JSON.parse(localStorage.getItem(this.id));
     if (datafromstorage !== null) {
       string = datafromstorage.string;
       labels = datafromstorage.labels;
     }
     let textareadata = document.createTextNode(string);
+
+    //Render labels on screen with realtime data entry
     document.getElementById(`input${this.id}`).appendChild(textareadata);
     if (!(labels === [])) {
       renderLabel(labels, this.id);
     }
   }
 
+  // Extract labels from input text
   extractLabels(string) {
     let labelsarray = new Array();
 
@@ -184,29 +222,3 @@ class renderer {
     return labelsarray;
   }
 }
-
-const genButton = () => {
-  let d = JSON.parse(localStorage.getItem(activeTab));
-  let str = d.string;
-  let labels = d.labels;
-
-  if (str === undefined || labels === undefined) {
-    str = ' ';
-    labels = [];
-  }
-
-  outputText(str, labels, activeTab);
-};
-
-const outputText = (str, labels, id) => {
-  let array = str.split('__');
-  for (let i = 0; i < labels.length; i++) {
-    for (let j = 0; j < array.length; j++) {
-      if (`${labels[i]}` === array[j]) {
-        array[j] = document.querySelector(`#${labels[i]}`).value;
-      }
-    }
-  }
-  let modString = array.join(' ');
-  document.querySelector(`#output${id}`).innerHTML = modString;
-};
