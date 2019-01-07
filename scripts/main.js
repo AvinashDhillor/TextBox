@@ -72,7 +72,7 @@ const saveoutdoc = () => {
 
 // Function to save template as .doc file
 const downloadInnerHtml = (filename, elId) => {
-  var elHtml = document.getElementById(elId).innerText;
+  var elHtml = document.getElementById(elId).innerHTML;
   var link = document.createElement('a');
   link.setAttribute('download', filename);
   link.setAttribute(
