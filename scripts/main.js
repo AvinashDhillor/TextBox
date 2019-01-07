@@ -30,7 +30,7 @@ const inputText = id => {
   <label for="inputText"
     ><h1 class="display-5">Tab ${id} : Input Text(__example__ for labels)</h1></label
   >
-
+  <button onclick="savedoc()" class="btn btn-primary mb-3 ml-auto ">Save as doc</button>
   <textarea
     class="form-control"
     id="input${id}"
@@ -49,6 +49,25 @@ const inputText = id => {
   >
   <div id="output${id}"></div>
 </div>`;
+};
+
+// Calling download function from save as doc button
+const savedoc = () => {
+  let fileName = `file${activeTab}.doc`;
+  let elid = `input${activeTab}`;
+  downloadInnerHtml(fileName, elid);
+};
+
+// Function to save template as .doc file
+const downloadInnerHtml = (filename, elId) => {
+  var elHtml = document.getElementById(elId).innerText;
+  var link = document.createElement('a');
+  link.setAttribute('download', filename);
+  link.setAttribute(
+    'href',
+    'data:' + 'text/doc' + ';charset=utf-8,' + encodeURIComponent(elHtml)
+  );
+  link.click();
 };
 
 // Html code to render label section
@@ -125,6 +144,7 @@ document.querySelector('#addNewTab').addEventListener('click', e => {
   a.setAttribute('id', `${tabCount}`);
 
   newTabElement.appendChild(a);
+
   let tabs = document.querySelector('#tabs');
 
   tabs.insertBefore(newTabElement, tabs.lastElementChild);
